@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dados Drinks & Games | Cardápio Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #001f0f;
+      --card-bg: #181f1b;
+      --header-bg: #011808;
+      --green-primary: #0d522c;
+      --green-accent: #178045;
+      --green-light: #24b865;
+      --dice-yellow: #f5b800;
+      --dice-red: #e52421;
+      --text-white: #ecfccf;
+      --text-muted: #9eb0a5;
+      --border-color: #243029;
+      --karaoke-color-primary: #3d0126;
+      --karaoke-color-accent: #e4008c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #e0e0e0;
+      padding-bottom: 50px;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--header-bg);
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .store-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .store-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      /*background-color: #000;
+      border: 2px solid var(--green-primary);
+      box-shadow: 0 0 10px rgba(13, 82, 44, 0.5);
+      flex-shrink: 0;*/
+    }
+
+    .store-details h1 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: -0.3px;
+    }
+
+    .store-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Busca */
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px;
+      background-color: #1a221d;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #fff;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--green-accent);
+    }
+
+    /* Seções Especiais (Ações Rápidas - 4 Botões) */
+    .special-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 12px 12px;
+      background-color: #01220b;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 4px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      gap: 4px;
+      transition: transform 0.2s;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-games {
+      background: linear-gradient(135deg, #1b382b, #0d522c);
+      border-color: var(--green-light);
+    }
+
+    .btn-karaoke { 
+      background: linear-gradient(135deg, #1a010d, var(--karaoke-color-primary)); 
+      border-color: var(--karaoke-color-accent);
+    }
+    .btn-quiz { 
+      background: linear-gradient(135deg, #2b1212, var(--dice-red)); 
+    }
+    .btn-vips { 
+      background: linear-gradient(135deg, #2b220a, var(--dice-yellow)); 
+      color: #111;
+    }
+
+    /* Navegação por Categorias */
+    .nav-categories {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      background-color: var(--header-bg);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 135px;
+      z-index: 99;
+      scrollbar-width: none;
+    }
+
+    .nav-categories::-webkit-scrollbar { display: none; }
+
+    .nav-tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background-color: #1a221d;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .nav-tab.active {
+      background-color: var(--green-primary);
+      color: var(--text-white);
+      border-color: var(--green-light);
+    }
+
+    /* Conteúdo Principal */
+    .menu-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Cabeçalho de Categoria Retrátil */
+    .category-header {
+      margin: 16px 0 8px 0;
+      background-color: #141a16;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--green-primary);
+      padding: 14px 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+
+    .category-header:hover {
+      background-color: #1a221d;
+    }
+
+    .category-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .category-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .category-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .category-icon {
+      font-size: 14px;
+      color: var(--dice-yellow);
+      font-weight: bold;
+      transition: transform 0.3s ease;
+    }
+
+    .category-header.open .category-icon {
+      transform: rotate(180deg);
+    }
+
+    .category-content {
+      display: none;
+      padding-top: 4px;
+    }
+
+    .category-content.open {
+      display: block;
+    }
+
+    /* Cards da Categoria Especial: Promoção (Display Deitado) */
+    .promo-container {
+      margin: 20px 0 10px 0;
+    }
+
+    .promo-header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--dice-yellow);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .promo-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--dice-yellow);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 15px rgba(245, 184, 0, 0.15);
+    }
+
+    .promo-banner {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background-color: #121714;
+    }
+
+    .promo-body {
+      padding: 14px;
+    }
+
+    .promo-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .promo-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .promo-btn-saiba-mais {
+      background-color: var(--green-primary);
+      color: var(--text-white);
+      border: 1px solid var(--green-light);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .promo-details {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .promo-details.open {
+      display: block;
+    }
+
+    /* Cards Estilo iFood */
+    .item-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .item-card.golden-ticket {
+      background: linear-gradient(135deg, #242010, #181f1b);
+      border: 1px solid var(--dice-yellow);
+      box-shadow: 0 0 12px rgba(245, 184, 0, 0.2);
+    }
+
+    .golden-badge {
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background: linear-gradient(90deg, var(--dice-yellow), #ffd043);
+      color: #111;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .item-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 4px;
+    }
+
+    /* Descrição Retrátil */
+    .item-description-container {
+      margin-bottom: 8px;
+    }
+
+    .item-description {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .item-description.expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+      line-clamp: unset;
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      color: var(--text-white);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 0;
+      margin-top: 2px;
+      display: inline-block;
+    }
+
+    .item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .item-price {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--dice-yellow);
+      white-space: nowrap;
+    }
+
+    .item-media {
+      width: 96px;
+      height: 96px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #121714;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .item-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-card.no-image .item-header .item-price {
+      font-size: 16px;
+    }
+
+    .game-tech {
+      font-size: 12px;
+      color: #88ec73;
+      background-color: #012403;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="store-info">
+      <img src="img/logo.png" alt="Dados Drinks & Games Logo" class="store-logo" onerror="this.src='https://via.placeholder.com/100/101412/0d522c?text=DADOS'">
+      <div class="store-details">
+        <h1>Dados Drinks & Games</h1>
+        <div class="store-meta">
+          <span>🍀🎲</span>
+          <span>•</span>
+          <span>Bar & Jogos</span>
+          <span>•</span>
+          <span>@dadoscabofrio</span>
+          <span>•</span>
+          <span>A Sua Melhor Jogada! </span>
+        </div>
+      </div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Buscar no cardápio..." onkeyup="filterMenu()">
+    </div>
+  </header>
+
+  <!-- Seções Especiais (4 Ações Rápidas) -->
+  <div class="special-actions">
+    <a href="#cat-catalogo-de-jogos" onclick="openCategoryBySlug('catalogo-de-jogos')" class="action-btn btn-games">
+      <span>♠️♦️♣️♥️</span> Catálgo de Jogos
+    </a>
+    <a href="https://karaoke-wlon.onrender.com" target="_blank" class="action-btn btn-karaoke">
+      <span>🎤✨</span> [Karaokê] Pedir Música
+    </a>
+    <a href="https://forms.gle/kVM6S6Ay6NrraBje6" target="_blank" class="action-btn btn-quiz">
+      <span>🧠💭</span> Formulário do Quiz
+    </a>
+    <a href="https://chat.whatsapp.com/DhM7vXf9JOP7UsrrSfEcgD" target="_blank" class="action-btn btn-vips">
+      <span>🎲👑</span> Participe do Grupo VIPs do Dados
+    </a>
+  </div>
+
+  <!-- Navegação por Categorias -->
+  <nav class="nav-categories" id="navCategories"></nav>
+
+  <!-- Cardápio Dinâmico -->
+  <main class="menu-container" id="menuContainer">
+    <div class="loading">Carregando cardápio em tempo real... 🎲</div>
+  </main>
+
+  <script>
+    // COLE SUA URL DO APPS SCRIPT ABAIXO:
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwiwNNOrB-Xy400vHhvriyD5NyO43YQBRhoWsnPYrz7_ajkE6MJ_aMwqPXZ61ErtYEdZw/exec';
+
+    const SUBTITULOS_CATEGORIAS = {
+      'promoção': 'Ofertas especiais por tempo limitado!',
+      'promocao': 'Ofertas especiais por tempo limitado!',
+      'petiscos': 'Deliciosas porções para compartilhar e começar a noite',
+      'burguers especiais': 'Hambúrgueres artesanais suculentos preparados na chapa',
+      'dados cocktails': 'Drinks autorais e clássicos inspirados na cultura pop',
+      'esses podem!': 'Deliciosos drinks sem álcool que apresentam a mágica da coquetelaria para todos os públicos',
+      'mini-drinks': 'Cocktails surpreendentes que cabem em uma dose',
+      'doses de destilados': 'Shots para brindar com a galera!',
+      'cervejas artesanais': 'Rótulos selecionados e bem gelados',
+      'bebidas': 'Refrigerantes, sucos e não alcoólicos',
+      'especial catálogo de jogos': 'Dezenas de jogos de disponíveis para a sua mesa. Peça agora!'
+    };
+
+    async function loadMenu() {
+      const container = document.getElementById('menuContainer');
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Erro de comunicação com o servidor.");
+
+        const items = await response.json();
+
+        if (!Array.isArray(items) || items.length === 0) {
+          container.innerHTML = `<div class="loading">Nenhum item encontrado na planilha.</div>`;
+          return;
+        }
+
+        renderMenu(items);
+      } catch (err) {
+        console.error("Erro ao carregar os dados:", err);
+        container.innerHTML = `<div class="loading">Erro ao carregar o cardápio.<br><small style="color:#ff6b6b;">${err.message}</small></div>`;
+      }
+    }
+
+    function renderMenu(items) {
+      const container = document.getElementById('menuContainer');
+      const nav = document.getElementById('navCategories');
+      container.innerHTML = '';
+      nav.innerHTML = '';
+
+      const categories = {};
+      let promoItems = [];
+
+      items.forEach(item => {
+        const ativoVal = (item.ativo || '').toString().trim().toLowerCase();
+        const isActive = ativoVal === '1' || ativoVal === 'sim' || ativoVal === 'true';
+
+        if (!isActive || !item.nome_item) return;
+
+        const catRaw = item.categoria ? item.categoria.toString().trim() : 'outros';
+        const catKey = catRaw.toLowerCase();
+
+        // Tratamento da Categoria Especial: Promoção
+        if (catKey === 'promoção' || catKey === 'promocao') {
+          promoItems.push(item);
+          return;
+        }
+
+        if (!categories[catKey]) {
+          categories[catKey] = {
+            title: catRaw,
+            items: []
+          };
+        }
+        categories[catKey].items.push(item);
+      });
+
+      // 1. RENDERIZAR SESSÃO DE PROMOÇÃO NO TOPO (SE HOUVER)
+      if (promoItems.length > 0) {
+        let promoHTML = `
+          <div class="promo-container">
+            <h2 class="promo-header-title">🍀O QUE SÓ TEM AQUI NO DADOS!🎲</h2>
+        `;
+
+        promoItems.forEach((item, idx) => {
+          let imgSrc = 'img/default.png';
+          if (item.img && item.img.trim() !== '') {
+            const imgClean = item.img.trim();
+            if (imgClean.startsWith('http://') || imgClean.startsWith('https://')) {
+              imgSrc = imgClean;
+            } else if (imgClean.startsWith('img/')) {
+              imgSrc = imgClean;
+            } else {
+              imgSrc = `img/${imgClean}`;
+            }
+          }
+
+          let priceFormatted = '';
+          if (item.preco && item.preco.trim() !== '') {
+            const numPrice = parseFloat(item.preco.replace(',', '.'));
+            priceFormatted = !isNaN(numPrice) ? `R$ ${numPrice.toFixed(2).replace('.', ',')}` : item.preco;
+          }
+
+          promoHTML += `
+            <div class="promo-card">
+              <img src="${imgSrc}" alt="${item.nome_item}" class="promo-banner" onerror="this.src='img/logo.png'">
+              <div class="promo-body">
+                <div class="promo-title-row">
+                  <h3 class="promo-title">${item.nome_item}</h3>
+                  <button class="promo-btn-saiba-mais" onclick="togglePromo('promo-desc-${idx}', this)">Saiba mais ▼</button>
+                </div>
+                ${priceFormatted ? `<span class="item-price" style="font-size:18px;">${priceFormatted}</span>` : ''}
+
+                <div class="promo-details" id="promo-desc-${idx}">
+                  ${item.peso ? `<div class="item-meta">📦 ${item.peso}</div>` : ''}
+                  ${item.estilo ? `<div class="item-meta">🎯 Estilo: ${item.estilo}</div>` : ''}
+                  <p class="item-description" style="display:block; -webkit-line-clamp:unset;">${item.descricao || ''}</p>
+                  ${item.carac_tecnicas ? `<div class="game-tech">⚙️ ${item.carac_tecnicas}</div>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        promoHTML += `</div>`;
+        container.innerHTML += promoHTML;
+      }
+
+      // 2. RENDERIZAR DEMAIS CATEGORIAS COMO MENUS RETRÁTEIS
+      const categoryKeys = Object.keys(categories);
+
+      if (categoryKeys.length === 0 && promoItems.length === 0) {
+        container.innerHTML = `<div class="loading">Nenhum item ativo encontrado na planilha.</div>`;
+        return;
+      }
+
+      let first = true;
+      categoryKeys.forEach(catKey => {
+        const catObj = categories[catKey];
+        const catSlug = catKey.replace(/[^a-z0-9]/g, '-');
+        const subtitle = SUBTITULOS_CATEGORIAS[catKey] || '';
+
+        // Aba da barra horizontal
+        nav.innerHTML += `<a href="#cat-${catSlug}" onclick="openCategoryBySlug('${catSlug}')" class="nav-tab ${first ? 'active' : ''}">${catObj.title}</a>`;
+        
+        // Abre a primeira categoria por padrão
+        const isFirstOpen = first;
+        first = false;
+
+        let catHTML = `
+          <section id="cat-${catSlug}">
+            <div class="category-header ${isFirstOpen ? 'open' : ''}" onclick="toggleCategory('content-${catSlug}', this)">
+              <div class="category-title-group">
+                <h2 class="category-title">${catObj.title}</h2>
+                ${subtitle ? `<span class="category-subtitle">${subtitle}</span>` : ''}
+              </div>
+              <span class="category-icon">▼</span>
+            </div>
+
+            <div class="category-content ${isFirstOpen ? 'open' : ''}" id="content-${catSlug}">
+        `;
+
+        catObj.items.forEach((item, index) => {
+          const destVal = (item.destaque || '').toString().trim().toLowerCase();
+          const isGolden = destVal === '1' || destVal === 'sim' || destVal === 'true';
+          const isGame = catKey.includes('jogo');
+
+          const hasImage = item.img && item.img.trim() !== '';
+          let imgSrc = '';
+          if (hasImage) {
+            const imgClean = item.img.trim();
+            if (imgClean.startsWith('http://') || imgClean.startsWith('https://')) {
+              imgSrc = imgClean;
+            } else if (imgClean.startsWith('img/')) {
+              imgSrc = imgClean;
+            } else {
+              imgSrc = `img/${imgClean}`;
+            }
+          }
+
+          let priceFormatted = '';
+          if (item.preco && item.preco.trim() !== '') {
+            const numPrice = parseFloat(item.preco.replace(',', '.'));
+            priceFormatted = !isNaN(numPrice) ? `R$ ${numPrice.toFixed(2).replace('.', ',')}` : item.preco;
+          }
+
+          const descText = item.descricao || '';
+          const hasLongDesc = descText.length > 55;
+
+          catHTML += `
+            <div class="item-card ${isGolden ? 'golden-ticket' : ''} ${!hasImage ? 'no-image' : ''}">
+              ${isGolden ? `<div class="golden-badge">🎟️ Golden Ticket</div>` : ''}
+              
+              <div class="item-info">
+                <div>
+                  <div class="item-header">
+                    <h3 class="item-title">${item.nome_item}</h3>
+                    ${!hasImage && !isGame && priceFormatted ? `<span class="item-price">${priceFormatted}</span>` : ''}
+                  </div>
+
+                  ${item.peso ? `<div class="item-meta">📦 ${item.peso}</div>` : ''}
+                  ${item.estilo ? `<div class="item-meta">🎯 Estilo: ${item.estilo}</div>` : ''}
+                  
+                  ${descText ? `
+                    <div class="item-description-container">
+                      <p class="item-description" id="desc-${catSlug}-${index}">${descText}</p>${hasLongDesc ? `<button class="expand-btn" onclick="toggleDesc('desc-${catSlug}-${index}', this)">Ver mais ▼</button>` : ''}
+                    </div>
+                  ` : ''}
+
+                  ${item.carac_tecnicas ? `<div class="game-tech">⚙️ ${item.carac_tecnicas}</div>` : ''}
+                </div>
+
+                ${hasImage && !isGame && priceFormatted ? `<span class="item-price">${priceFormatted}</span>` : ''}
+              </div>
+
+              ${hasImage ? `
+                <div class="item-media">
+                  <img src="${imgSrc}" alt="${item.nome_item}" onerror="this.src='img/logo.png'">
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+
+        catHTML += `
+            </div>
+          </section>
+        `;
+        container.innerHTML += catHTML;
+      });
+    }
+
+    // Função para abrir/fechar categorias sanfona
+    function toggleCategory(contentId, headerElem) {
+      const content = document.getElementById(contentId);
+      const isOpen = content.classList.contains('open');
+
+      if (isOpen) {
+        content.classList.remove('open');
+        headerElem.classList.remove('open');
+      } else {
+        content.classList.add('open');
+        headerElem.classList.add('open');
+      }
+    }
+
+    // Função para acionar e expandir a categoria ao clicar nos botões/abas
+    function openCategoryBySlug(catSlug) {
+      const content = document.getElementById(`content-${catSlug}`);
+      if (content) {
+        content.classList.add('open');
+        const header = content.previousElementSibling;
+        if (header) header.classList.add('open');
+      }
+    }
+
+    // Toggle para o botão "Saiba mais" do Banner da Promoção
+    function togglePromo(id, btn) {
+      const details = document.getElementById(id);
+      if (details.classList.contains('open')) {
+        details.classList.remove('open');
+        btn.textContent = 'Saiba mais ▼';
+      } else {
+        details.classList.add('open');
+        btn.textContent = 'Recolher ▲';
+      }
+    }
+
+    // Toggle para descrições dos cards comuns
+    function toggleDesc(id, btn) {
+      const descElem = document.getElementById(id);
+      if (descElem.classList.contains('expanded')) {
+        descElem.classList.remove('expanded');
+        btn.textContent = 'Ver mais ▼';
+      } else {
+        descElem.classList.add('expanded');
+        btn.textContent = 'Ver menos ▲';
+      }
+    }
+
+    // Filtro de Busca que expande automaticamente todas as categorias para pesquisa
+    function filterMenu() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.item-card, .promo-card');
+      const allContents = document.querySelectorAll('.category-content');
+      const allHeaders = document.querySelectorAll('.category-header');
+
+      if (input.trim() !== '') {
+        allContents.forEach(c => c.classList.add('open'));
+        allHeaders.forEach(h => h.classList.add('open'));
+      }
+
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(input) ? "flex" : "none";
+      });
+    }
+
+    loadMenu();
+  </script>
+</body>
+</html>
